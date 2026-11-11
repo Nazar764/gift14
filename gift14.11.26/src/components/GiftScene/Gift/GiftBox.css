@@ -1,0 +1,413 @@
+/* Ізольована сцена подарунка */
+.gift-scene__gift {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+/* Кнопка звуку */
+.sound-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 40;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+.sound-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Заголовок */
+.title-wrap {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  width: min(90vw, 760px);
+  text-align: center;
+  z-index: 20;
+  opacity: 0;
+  transform: translate(-50%, -20px);
+  transition: all 0.8s ease;
+}
+.title-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.title-wrap h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  color: #fff;
+  text-shadow: 0 4px 15px rgba(219, 39, 119, 0.5);
+  font-weight: 800;
+}
+
+/* Радіальний спалах після зльоту кришки */
+.white-flash-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100vmax;
+  height: 100vmax;
+  background: radial-gradient(circle, #fff 0%, #fff 72%, rgba(255, 255, 255, 0.98) 100%);
+  z-index: 35;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 50%;
+  pointer-events: none;
+  visibility: hidden;
+}
+.white-flash-active {
+  visibility: visible;
+  animation: radial-flash 1.25s 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes radial-flash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+/* Подарунок приземляється знизу по центру */
+.gift-stage {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(3.75rem, 15vh, 9rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  perspective: 700px;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.instruction-banner {
+  position: absolute;
+  bottom: calc(100% + 34px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(90vw, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 10px 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  animation: floatBanner 2s ease-in-out infinite;
+  z-index: 25;
+}
+.instruction-banner p {
+  margin: 0 0 8px 0;
+  color: #db2777;
+  font-weight: 700;
+  font-size: clamp(0.82rem, 3.5vw, 0.95rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  gap: 8px;
+}
+.progress-bar {
+  width: min(180px, 70vw);
+  height: 8px;
+  background: #fce7f3;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar__fill {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, #db2777, #f472b6);
+  border-radius: inherit;
+  will-change: transform;
+}
+
+.sparkle {
+  display: inline-block;
+  animation: sparkleSpin 1.2s linear infinite;
+}
+
+@keyframes floatBanner {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -5px); }
+}
+@keyframes sparkleSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Анімації обгортки подарунка */
+.gift-box-wrapper {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.gift-box-wrapper:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.95);
+  outline-offset: 10px;
+  border-radius: 12px;
+}
+
+/* Весняне падіння з коротким пружним приземленням */
+.animate-drop-down {
+  animation: dropIn 1.25s cubic-bezier(0.22, 1.35, 0.45, 1) forwards;
+}
+
+@keyframes dropIn {
+  0% {
+    transform: translateY(-110vh) scale(0.72);
+    opacity: 0;
+  }
+  68% {
+    transform: translateY(12px) scale(1.04);
+    opacity: 1;
+  }
+  84% {
+    transform: translateY(-7px) scale(0.98);
+  }
+  93% {
+    transform: translateY(3px) scale(1.01);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* М'яка тряска при затисканні */
+.animate-shake-box {
+  animation: shakeSoft 0.32s ease-in-out infinite;
+}
+
+@keyframes shakeSoft {
+  0%, 100% { transform: rotate(0deg) scale(1.01); }
+  25% { transform: rotate(-1.6deg) scale(1.025); }
+  75% { transform: rotate(1.6deg) scale(1.025); }
+}
+
+/* Кришка вилітає з перспективою й обертанням */
+.animate-lid-fly {
+  animation: lidFlyUp 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes lidFlyUp {
+  0% {
+    transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) rotateZ(0) scale(1);
+    opacity: 1;
+  }
+  20% {
+    transform: translate3d(0, -18px, 30px) rotateX(-8deg) rotateY(0) rotateZ(-5deg) scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(24px, -320px, 120px) rotateX(-35deg) rotateY(28deg) rotateZ(48deg) scale(0.78);
+    opacity: 0;
+  }
+}
+
+/* Тінь під коробкою */
+.gift-shadow {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 50%;
+  filter: blur(6px);
+  transition: all 0.3s ease;
+}
+
+/* Дизайн самої коробки */
+.gift-box {
+  position: relative;
+  width: 190px;
+  height: 170px;
+  transform-style: preserve-3d;
+}
+
+.gift-box__base {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 135px;
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 15px 35px rgba(225, 29, 72, 0.4), inset 0 -10px 20px rgba(0,0,0,0.1);
+}
+
+.gift-box__lid {
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: calc(100% + 16px);
+  height: 45px;
+  background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  z-index: 5;
+  transform-origin: bottom center;
+}
+
+/* Стрічки */
+.gift-ribbon {
+  position: absolute;
+  background: linear-gradient(90deg, #ffffff, #f1f5f9);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.gift-ribbon--vertical {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26px;
+}
+.gift-ribbon--horizontal {
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  height: 26px;
+}
+.gift-ribbon--lid-vertical {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26px;
+}
+
+/* Пишний бант */
+.gift-bow {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 65px;
+  height: 32px;
+  z-index: 6;
+}
+.gift-bow__left, .gift-bow__right {
+  position: absolute;
+  width: 35px;
+  height: 30px;
+  border: 6px solid #fff;
+  border-radius: 50% 50% 0 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.gift-bow__left {
+  left: -2px;
+  transform: rotate(-30deg);
+}
+.gift-bow__right {
+  right: -2px;
+  transform: scaleX(-1) rotate(-30deg);
+}
+.gift-bow__center {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+/* Конфеті шар */
+.confetti-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+}
+.confetti-piece {
+  position: absolute;
+  border-radius: 3px;
+  animation: confetti-burst 1.8s cubic-bezier(0.15, 0.65, 0.35, 1) forwards;
+  will-change: transform, opacity;
+}
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+  48% {
+    opacity: 1;
+    transform: translate3d(var(--confetti-mid-x), var(--confetti-mid-y), 0) rotate(360deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--confetti-x), var(--confetti-y), 0) rotate(var(--confetti-rotation));
+  }
+}
+
+@media (max-width: 480px) {
+  .instruction-banner {
+    padding: 9px 12px;
+  }
+
+  .instruction-banner p {
+    gap: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .instruction-banner,
+  .sparkle {
+    animation: none;
+  }
+
+  .animate-drop-down {
+    animation-duration: 0.01ms;
+  }
+
+  .animate-shake-box {
+    animation: none;
+  }
+
+  .animate-lid-fly,
+  .white-flash-active {
+    animation-duration: 0.25s;
+    animation-delay: 0s;
+  }
+}
