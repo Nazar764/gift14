@@ -9,6 +9,7 @@ const BookScene = lazy(() => import('./BookScene').then(({ BookScene }) => ({ de
 const birthdayHeader = ''
 const OPENING_TRANSITION_DURATION = 2200
 const MUSIC_TRACKS = ['/audio/background.mp3', '/audio/I-Love-you-so.mp3'] as const
+const BOOK_SONG_VOLUME = 1
 
 const buildHearts = (): FloatingHeart[] =>
   Array.from({ length: 25 }, (_, i) => {
@@ -48,7 +49,6 @@ export function GiftScene() {
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null)
   const musicTrackIndexRef = useRef(0)
   const musicStartedRef = useRef(false)
-  const musicStoppedRef = useRef(false)
   const holdSoundRef = useRef<HTMLAudioElement | null>(null)
   const confettiSoundRef = useRef<HTMLAudioElement | null>(null)
   const bookSongRef = useRef<HTMLAudioElement | null>(null)
@@ -58,20 +58,24 @@ export function GiftScene() {
   const confettiSoundVolume = 0.12
 
   useEffect(() => {
+    if (bookSongRef.current) bookSongRef.current.volume = BOOK_SONG_VOLUME
+  }, [])
+
+  useEffect(() => {
     const audio = backgroundMusicRef.current
     if (!audio) return
 
     audio.volume = backgroundMusicVolume
 
     const playCurrentTrack = () => {
-      if (isMuted || musicStoppedRef.current) return
+      if (isMuted) return
       void audio.play().catch((error: unknown) => {
         console.error(`Не вдалося відтворити ${MUSIC_TRACKS[musicTrackIndexRef.current]}.`, error)
       })
     }
 
     const startPlayback = () => {
-      if (isMuted || musicStoppedRef.current || musicStartedRef.current) return
+      if (isMuted || musicStartedRef.current) return
       void audio.play().then(
         () => {
           musicStartedRef.current = true
@@ -106,8 +110,6 @@ export function GiftScene() {
   useEffect(() => {
     if (!showBook) return
 
-    musicStoppedRef.current = true
-    backgroundMusicRef.current?.pause()
     if (holdSoundRef.current) {
       holdSoundRef.current.pause()
       holdSoundRef.current.currentTime = 0
@@ -116,7 +118,7 @@ export function GiftScene() {
 
   const playBackgroundMusic = () => {
     const audio = backgroundMusicRef.current
-    if (!audio || !audio.paused || musicStoppedRef.current) return
+    if (!audio || !audio.paused) return
 
     void audio.play().catch((error: unknown) => {
       console.error(`Не вдалося відтворити ${MUSIC_TRACKS[musicTrackIndexRef.current]}.`, error)
@@ -254,7 +256,7 @@ export function GiftScene() {
       stopHoldSound()
     } else {
       playBackgroundMusic()
-      if (backgroundMusicRef.current?.paused && !musicStoppedRef.current) {
+      if (backgroundMusicRef.current?.paused) {
         musicStartedRef.current = false
       }
       if (stage === 'holding') playHoldSound()
@@ -265,7 +267,12 @@ export function GiftScene() {
     <div className="gift-scene">
       <Background hearts={hearts} cats={cats} />
       <audio ref={backgroundMusicRef} src={MUSIC_TRACKS[0]} preload="none" />
-      <audio ref={bookSongRef} src="/audio/strikalovods.mp4" preload="auto" />
+      <audio
+        ref={bookSongRef}
+        src="/audio/strikalovods.mp4"
+        preload="auto"
+        muted={isMuted}
+      />
       <audio ref={holdSoundRef} src="/audio/Open-effect.mp3" loop preload="auto" />
       <audio ref={confettiSoundRef} src="/audio/Confetti.mp3" preload="auto" />
 
