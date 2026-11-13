@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import * as THREE from 'three'
+import confetti from 'canvas-confetti'
 
 type BookPhase = 'falling' | 'landed' | 'opening' | 'opened' | 'turning' | 'closing'
 
@@ -15,9 +16,14 @@ const CLOSE_DURATION = 700
 const CLOSE_PAGE_DURATION = 400
 const SECOND_VERSE_START_SECONDS = 7
 const PAGE_COUNT = 14
-const LEAF_COUNT = (PAGE_COUNT - 2) / 2
+const LEAF_COUNT = 6
 const LEAF_THICKNESS = 0.02
 const PAGE_TWO_EXTRA_THICKNESS = 0.014
+const pageImageUrls = import.meta.glob('../../../page/st*.png', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
 
 interface PageLeaf {
   group: THREE.Group
@@ -26,7 +32,7 @@ interface PageLeaf {
 
 function createPageTexture(
   renderer: THREE.WebGLRenderer,
-  pageNumber: number,
+  page: { number: number; text: string; image?: string },
 ): THREE.CanvasTexture {
   const canvas = document.createElement('canvas')
   canvas.width = 768
@@ -37,21 +43,40 @@ function createPageTexture(
 
   context.fillStyle = '#f7efdf'
   context.fillRect(0, 0, 900, 1200)
-  context.strokeStyle = 'rgba(147, 103, 91, 0.17)'
-  context.lineWidth = 2
-  context.strokeRect(38, 38, 824, 1124)
 
-  context.textAlign = 'center'
-  context.textBaseline = 'middle'
-  context.fillStyle = '#704052'
-  context.font = '600 68px Georgia, serif'
-  context.fillText(String(pageNumber), 450, pageNumber === PAGE_COUNT ? 390 : 600)
-  if (pageNumber === PAGE_COUNT) {
-    context.font = '700 72px Georgia, serif'
-    context.fillText('С днем рождения!', 450, 540, 740)
+  if (page.image) {
+    const illustration = new Image()
+    illustration.onload = () => {
+      context.drawImage(illustration, 0, 0, 900, 1200)
+      texture.needsUpdate = true
+      const backTextures = texture.userData.backTextures as THREE.Texture[]
+      backTextures.forEach((backTexture) => {
+        backTexture.needsUpdate = true
+      })
+    }
+    illustration.src = page.image
+  } else {
+    context.strokeStyle = 'rgba(147, 103, 91, 0.17)'
+    context.lineWidth = 2
+    context.strokeRect(38, 38, 824, 1124)
+
+    context.textAlign = 'right'
+    context.textBaseline = 'top'
+    context.fillStyle = 'rgba(112, 64, 82, 0.48)'
+    context.font = '28px Georgia, serif'
+    context.fillText(String(page.number), 830, 72)
+
+    context.textAlign = 'center'
+    context.textBaseline = 'middle'
+    context.fillStyle = '#704052'
+    if (page.text) {
+      context.font = '600 62px Georgia, serif'
+      context.fillText(page.text, 450, 600, 740)
+    }
   }
 
   const texture = new THREE.CanvasTexture(canvas)
+  texture.userData.backTextures = []
   texture.colorSpace = THREE.SRGBColorSpace
   texture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4)
   return texture
@@ -88,8 +113,8 @@ function createCoverTexture(renderer: THREE.WebGLRenderer): THREE.CanvasTexture 
   context.fillStyle = '#fff5e8'
   context.font = '700 62px Georgia, serif'
   context.textBaseline = 'middle'
-  context.fillText('Як в 20 років', 450, 232)
-  context.fillText('стати мілфою', 450, 310)
+  context.fillText('20 років — це', 450, 232)
+  context.fillText('не так багато', 450, 310)
 
   const frameX = 135
   const frameY = 405
@@ -177,6 +202,19 @@ export function BookScene({ songRef }: { songRef: RefObject<HTMLAudioElement | n
   const [activeSpread, setActiveSpread] = useState(0)
   const [sceneError, setSceneError] = useState('')
 
+  const celebratePageTurn = () => {
+    confetti({
+      particleCount: 72,
+      spread: 82,
+      startVelocity: 36,
+      gravity: 0.9,
+      ticks: 150,
+      origin: { x: 0.5, y: 0.46 },
+      colors: ['#ff6b8a', '#ffd166', '#72d6bd', '#fff1df', '#c084fc'],
+      disableForReducedMotion: true,
+    })
+  }
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -253,7 +291,11 @@ export function BookScene({ songRef }: { songRef: RefObject<HTMLAudioElement | n
     const pageSide = new THREE.MeshStandardMaterial({ color: '#e8d9c6', roughness: 0.9 })
     const coverTexture = createCoverTexture(renderer)
     const pageTextures = Array.from({ length: PAGE_COUNT }, (_, index) =>
-      createPageTexture(renderer, index + 1),
+      createPageTexture(renderer, {
+        number: index + 1,
+        text: '',
+        image: pageImageUrls[`../../../page/st${index + 1}.png`],
+      }),
     )
     const getPageTexture = (pageNumber: number) => pageTextures[pageNumber - 1]
     const createBackPageTexture = (texture: THREE.Texture) => {
@@ -261,6 +303,8 @@ export function BookScene({ songRef }: { songRef: RefObject<HTMLAudioElement | n
       backTexture.center.set(0.5, 0.5)
       backTexture.rotation = Math.PI
       backTexture.needsUpdate = true
+      const backTextures = texture.userData.backTextures as THREE.Texture[]
+      backTextures.push(backTexture)
       return backTexture
     }
     const createPageFaceMaterial = (texture: THREE.Texture) =>
@@ -600,6 +644,7 @@ export function BookScene({ songRef }: { songRef: RefObject<HTMLAudioElement | n
           if (openProgress === 1) {
             phaseRef.current = 'opened'
             setPhase('opened')
+            celebratePageTurn()
           }
         }
 
@@ -631,6 +676,7 @@ export function BookScene({ songRef }: { songRef: RefObject<HTMLAudioElement | n
               activeTurningPage = null
               phaseRef.current = 'opened'
               setPhase('opened')
+              celebratePageTurn()
             }
           }
         } else if (phaseRef.current === 'closing') {
