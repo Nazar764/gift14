@@ -3,12 +3,16 @@ import './GiftScene.css'
 import { Background, type FloatingHeart, type RunningCat } from './Background/Background'
 import { GiftBox, type ConfettiParticle } from './Gift/GiftBox'
 import { FallingGame } from './FallingGame/FallingGame'
+import { publicAsset } from '../../utils/publicAsset'
 
 const BookScene = lazy(() => import('./BookScene').then(({ BookScene }) => ({ default: BookScene })))
 
 const birthdayHeader = ''
 const OPENING_TRANSITION_DURATION = 2200
-const MUSIC_TRACKS = ['/audio/background.mp3', '/audio/I-Love-you-so.mp3'] as const
+const MUSIC_TRACKS = [
+  publicAsset('audio/background.mp3'),
+  publicAsset('audio/I-Love-you-so.mp3'),
+] as const
 const BOOK_SONG_VOLUME = 1
 
 const buildHearts = (): FloatingHeart[] =>
@@ -269,12 +273,12 @@ export function GiftScene() {
       <audio ref={backgroundMusicRef} src={MUSIC_TRACKS[0]} preload="none" />
       <audio
         ref={bookSongRef}
-        src="/audio/strikalovods.mp4"
+        src={publicAsset('audio/strikalovods.mp4')}
         preload="auto"
         muted={isMuted}
       />
-      <audio ref={holdSoundRef} src="/audio/Open-effect.mp3" loop preload="auto" />
-      <audio ref={confettiSoundRef} src="/audio/Confetti.mp3" preload="auto" />
+      <audio ref={holdSoundRef} src={publicAsset('audio/Open-effect.mp3')} loop preload="auto" />
+      <audio ref={confettiSoundRef} src={publicAsset('audio/Confetti.mp3')} preload="auto" />
 
       <GiftBox
         stage={stage}

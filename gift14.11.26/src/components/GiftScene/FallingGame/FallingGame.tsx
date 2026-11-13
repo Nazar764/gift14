@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import './FallingGame.css'
+import { publicAsset } from '../../../utils/publicAsset'
 
 const GOAL = 25
 const NORMAL_SPAWN_INTERVAL = 950
@@ -156,7 +157,7 @@ export function FallingGame({ onBookOpen }: FallingGameProps) {
     removeItem(item.id)
 
     if (item.kind === 'bomb') {
-      playSound('/audio/granata.mp4')
+      playSound(publicAsset('audio/granata.mp4'))
       setMessage('Бомба! Збирай усе крім бомб.')
       if (messageTimeoutRef.current !== null) {
         window.clearTimeout(messageTimeoutRef.current)
@@ -166,7 +167,7 @@ export function FallingGame({ onBookOpen }: FallingGameProps) {
     }
 
     if (item.kind === 'cat') {
-      playSound('/audio/cat.mp4')
+      playSound(publicAsset('audio/cat.mp4'))
     } else {
       playCollectSound()
     }
@@ -185,7 +186,7 @@ export function FallingGame({ onBookOpen }: FallingGameProps) {
 
   const handleBookContinue = () => {
     if (isLeaving) return
-    playSound('/audio/win.mp4')
+    playSound(publicAsset('audio/win.mp4'))
     setIsLeaving(true)
     bookTransitionTimeoutRef.current = window.setTimeout(onBookOpen, 450)
   }

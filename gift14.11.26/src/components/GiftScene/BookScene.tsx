@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import * as THREE from 'three'
 import confetti from 'canvas-confetti'
+import { publicAsset } from '../../utils/publicAsset'
 
 type BookPhase = 'falling' | 'landed' | 'opening' | 'opened' | 'turning' | 'closing'
 
@@ -167,7 +168,7 @@ function createCoverTexture(renderer: THREE.WebGLRenderer): THREE.CanvasTexture 
     )
     texture.needsUpdate = true
   }
-  albumCover.src = '/audio/strikalo.jpg'
+  albumCover.src = publicAsset('audio/strikalo.jpg')
 
   return texture
 }
